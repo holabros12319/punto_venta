@@ -79,7 +79,7 @@ public class RepositorioServicios {
         try {
             Connection conn = conexionSQL.obtenerConexion();
             try (PreparedStatement ps = conn.prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
+                ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
                     lista.add(mapearFila(rs));

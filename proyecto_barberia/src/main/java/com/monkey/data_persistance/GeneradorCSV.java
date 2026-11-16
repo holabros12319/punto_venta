@@ -24,7 +24,7 @@ public class GeneradorCSV {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(destino), StandardCharsets.UTF_8))) {
 
-            // Marca BOM UTF-8 para compatibilidad directa con Microsoft Excel en Windows
+            
             writer.write('\uFEFF');
 
             if (lineas != null) {
