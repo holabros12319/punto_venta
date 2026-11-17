@@ -1,0 +1,26 @@
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException: text
+	at java.base/java.util.Objects.requireNonNull(Objects.java:235)
+	at java.base/java.time.format.DateTimeFormatter.parse(DateTimeFormatter.java:1951)
+	at java.base/java.time.LocalTime.parse(LocalTime.java:465)
+	at com.monkey.data_persistance.RepositorioCitas.construirCitaDesdeFila(RepositorioCitas.java:226)
+	at com.monkey.data_persistance.RepositorioCitas.buscarPorFiltro(RepositorioCitas.java:156)
+	at com.monkey.logic.GestorAgenda.buscarCitas(GestorAgenda.java:93)
+	at com.monkey.ui.VistaAgenda.cargarTablaCitas(VistaAgenda.java:231)
+	at com.monkey.ui.VentanaPrincipal.iniciar(VentanaPrincipal.java:66)
+	at com.monkey.App$1.run(App.java:63)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+	at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+	at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:399)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:86)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+	at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)

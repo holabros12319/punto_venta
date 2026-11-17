@@ -1,0 +1,197 @@
+@startuml MonkeyBarberClassDiagram
+title MONKEY ELEGANT SYSTEM 
+left to right direction
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "com.monkey.ui" {
+  class VentanaPrincipal {
+    -panelPestanas : JTabbedPane
+    -vistaAgenda : VistaAgenda
+    -vistaCatalogo : VistaCatalogo
+    -vistaPOS : VistaPOS
+    -sesionAdmin : SesionAdmin
+    +iniciar() : void
+    +verificarAccesoAdmin() : boolean
+  }
+  class VistaAgenda {
+    -gestorAgenda : GestorAgenda
+    -gestorCatalogo : GestorCatalogo
+    +refrescarHorarios() : void
+    +refrescarServicios() : void
+    +cargarTablaCitas() : void
+  }
+  class VistaCatalogo {
+    -gestorCatalogo : GestorCatalogo
+    -ventanaPadre : VentanaPrincipal
+    -btnCambiarPin : JButton
+    +cargarTablaServicios() : void
+    -onCambiarPin() : void
+  }
+  class VistaPOS {
+    -gestorPOS : GestorPOS
+    -generadorReportes : GeneradorReportes
+    -ventanaPadre : VentanaPrincipal
+    +buscarCitasActivas() : void
+    -onProcesarCobro() : void
+    -onExportarCSV(detallado : boolean) : void
+  }
+  class DialogoPinAdmin {
+    -campoPin : JPasswordField
+    -confirmado : boolean
+    +solicitarYValidar(padre : Component, sesion : SesionAdmin) : boolean {static}
+    +solicitarCambio(padre : Component, sesion : SesionAdmin) : boolean {static}
+  }
+}
+
+package "com.monkey.logic" {
+  class SesionAdmin {
+    -autenticado : boolean
+    -pinConfigurado : String <<hash PBKDF2>>
+    -ultimoAcceso : LocalDateTime
+    -repositorioPin : RepositorioPin
+    +SesionAdmin(pinConfigurado : String)
+    +SesionAdmin(pinInicial : String, repositorioPin : RepositorioPin)
+    +validarPin(pinIngresado : String) : boolean
+    +cambiarPin(pinAnterior : String, pinNuevo : String) : void
+    +estaAutenticado() : boolean
+    +cerrarSesion() : void
+  }
+  class GestorCatalogo {
+    -repoServicios : RepositorioServicios
+    +guardarServicio(servicio : servicios) : void
+    +editarServicio(servicio : servicios) : void
+    +filtrarServicios(texto : String, soloActivos : boolean) : List<servicios>
+  }
+  class GestorAgenda {
+    -repoCitas : RepositorioCitas
+    +registrarCita(cita : cita) : void
+    +obtenerHorariosDisponibles(fecha : LocalDate) : List<LocalTime>
+    +buscarCitas(cliente : String, fecha : LocalDate) : List<cita>
+    +cambiarEstadoCita(idCita : int, nuevoEstado : String) : void
+  }
+  class GestorPOS {
+    -repoCitas : RepositorioCitas
+    -repoVentas : RepositorioVentas
+    +buscarCitasPorCobrar(cliente : String) : List<cita>
+    +calcularCambio(total : BigDecimal, efectivo : BigDecimal) : BigDecimal
+    +procesarCobro(idCita : int, efectivo : BigDecimal) : venta
+  }
+  class GeneradorReportes {
+    -repoVentas : RepositorioVentas
+    -escritorCSV : GeneradorCSV
+    +exportarDetallado(destino : File) : void
+    +exportarAcumuladoMensual(destino : File) : void
+  }
+}
+
+package "com.monkey.data_persistance" {
+  class RepositorioPin {
+    -archivoPin : Path
+    +leerConfiguracion() : String
+    +guardarHash(hashVersionado : String) : void
+  }
+  class conexion_DB {
+    -urlConexion : String
+    +obtenerConexion() : Connection
+    +inicializarTablas() : void
+  }
+  class RepositorioServicios {
+    -conexion : conexion_DB
+    +insertar(servicio : servicios) : void
+    +actualizar(servicio : servicios) : void
+    +listarTodos() : List<servicios>
+    +listarActivos() : List<servicios>
+  }
+  class RepositorioCitas {
+    -conexion : conexion_DB
+    +insertar(cita : cita) : void
+    +obtenerPorId(idCita : int) : cita
+    +obtenerHorariosOcupados(fecha : LocalDate) : List<LocalTime>
+    +listarCobrables(cliente : String) : List<cita>
+    +actualizarEstado(idCita : int, estado : String) : void
+  }
+  class RepositorioVentas {
+    -conexion : conexion_DB
+    -repoCitas : RepositorioCitas
+    +registrarVentaTransaccional(venta : venta) : void
+    +listarTodas() : List<venta>
+  }
+  class GeneradorCSV {
+    +escribirLineas(destino : File, lineas : List<String>) : void
+  }
+}
+
+package "com.monkey.model" {
+  class cita {
+    -idCita : int
+    -nombreCliente : String
+    -fecha : LocalDate
+    -hora : LocalTime
+    -servicios : List<servicios>
+    -estado : String
+    +calcularCostoTotal() : BigDecimal
+  }
+  class servicios {
+    -idServicio : int
+    -nombre : String
+    -costoUnitario : BigDecimal
+    -categoria : String
+    -activo : boolean
+  }
+  class venta {
+    -idVenta : int
+    -cita : cita
+    -snapshotServicios : String
+    -total : BigDecimal
+    -efectivo : BigDecimal
+    -cambio : BigDecimal
+    -fechaHora : LocalDateTime
+  }
+}
+
+class App {
+  +main(args : String[]) : void {static}
+}
+
+VentanaPrincipal *-- VistaAgenda
+VentanaPrincipal *-- VistaCatalogo
+VentanaPrincipal *-- VistaPOS
+VentanaPrincipal *-- SesionAdmin
+VistaAgenda --> GestorAgenda
+VistaAgenda --> GestorCatalogo
+VistaCatalogo --> GestorCatalogo
+VistaCatalogo --> DialogoPinAdmin : botón Cambiar PIN
+VistaPOS --> GestorPOS
+VistaPOS --> GeneradorReportes
+VistaPOS --> DialogoPinAdmin : autorización CSV
+DialogoPinAdmin --> SesionAdmin : validar / cambiar
+SesionAdmin --> RepositorioPin : guarda hash
+GestorCatalogo --> RepositorioServicios
+GestorAgenda --> RepositorioCitas
+GestorPOS --> RepositorioCitas
+GestorPOS --> RepositorioVentas
+GeneradorReportes --> RepositorioVentas
+GeneradorReportes --> GeneradorCSV
+RepositorioServicios --> conexion_DB
+RepositorioCitas --> conexion_DB
+RepositorioVentas --> conexion_DB
+RepositorioVentas --> RepositorioCitas
+RepositorioVentas --> venta
+cita "1" o-- "1..*" servicios
+venta "1" --> "1" cita
+App ..> RepositorioPin : ensambla
+App ..> SesionAdmin : ensambla
+
+note right of RepositorioPin
+  Archivo local pin.conf;
+  PBKDF2WithHmacSHA256 + sal aleatoria.
+  No usa SQLite. Migra valores heredados.
+end note
+
+note bottom of cita
+  Brecha abierta RF9: el PRD pide hora de término;
+  el modelo vigente solo contiene hora de inicio.
+end note
+@enduml
